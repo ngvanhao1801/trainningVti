@@ -1,0 +1,67 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.training.repository.OrderRepository">
+    <resultMap id="productCartResultMap" type="com.example.training.dto.ProductCart">
+        <result property="id" column="ID"/>
+        <result property="name" column="NAME"/>
+        <result property="shortDes" column="SHORT_DES"/>
+        <result property="description" column="DESCRIPTION"/>
+        <result property="price" column="PRICE"/>
+        <result property="quantity" column="QUANTITY"/>
+    </resultMap>
+
+    <select id="isExistByUserAndStatus" resultType="boolean">
+        SELECT EXISTS(SELECT 1
+                      FROM orders
+                      WHERE user_id = #{userId}
+                        AND status = #{status}
+                        AND delete_flag = 0)
+    </select>
+    <select id="isExistsById" resultType="boolean">
+        SELECT EXISTS(SELECT 1
+                      FROM orders
+                      WHERE id=#{id})
+    </select>
+    <insert id="insertOrder">
+        INSERT INTO orders(user_id, note, status, delete_flag)
+        VALUES (#{userId}, #{note}, 0, 0);
+    </insert>
+    <insert id="addProductToCart">
+        INSERT INTO orders_detail(note, price, quantity, product_id, orders_id)
+        VALUES (#{note},#{price},#{quantity},#{productId},#{orderId});
+    </insert>
+    <select id="findByUserAndStatus" resultType="int">
+        SELECT id
+        FROM orders
+        WHERE user_id = #{userId}
+          AND status = #{status}
+          AND delete_flag = 0
+    </select>
+    <delete id="deleteProductFromCart">
+        DELETE
+        FROM orders_detail
+        WHERE product_id = #{productId}
+          AND orders_id = #{orderId}
+    </delete>
+    <select id="findCartByUser" resultType="int">
+        SELECT id
+        FROM orders
+        WHERE user_id = #{userId}
+          AND status = 0
+          AND delete_flag =0
+    </select>
+    <select id="getProductsFromCart" resultMap="productCartResultMap">
+        SELECT product_id,
+               p.name,
+               p.short_des,
+               p.description,
+               p.price,
+               quantity
+        FROM (SELECT *
+              FROM orders_detail
+              WHERE orders_id = #{orderId}) AS od
+                 JOIN product AS p ON od.product_id = p.id
+    </select>
+
+</mapper>

@@ -1,0 +1,61 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.training.repository.ProductRepository">
+    <resultMap id="productResultMap" type="com.example.training.model.Product">
+        <result property="id" column="ID"/>
+        <result property="name" column="NAME"/>
+        <result property="shortDes" column="SHORT_DES"/>
+        <result property="description" column="DESCRIPTION"/>
+        <result property="price" column="PRICE"/>
+    </resultMap>
+
+    <insert id="insertProduct">
+        INSERT INTO product (NAME, SHORT_DES, DESCRIPTION, PRICE)
+        VALUES (#{name}, #{shortDes}, #{description}, #{price})
+    </insert>
+
+    <update id="updateProduct">
+        UPDATE product
+        SET NAME        = #{name},
+            SHORT_DES   = #{shortDes},
+            DESCRIPTION = #{description},
+            PRICE       = #{price}
+        WHERE ID = #{id}
+          AND delete_flag = 0
+    </update>
+
+    <delete id="deleteProductById">
+        DELETE
+        FROM product
+        WHERE ID = #{id}
+    </delete>
+
+    <select id="selectAllProduct" resultMap="productResultMap">
+        SELECT *
+        FROM product
+        WHERE delete_flag = 0
+    </select>
+
+    <select id="selectProductById" parameterType="int" resultMap="productResultMap">
+        SELECT *
+        FROM product
+        WHERE ID = #{id}
+          AND delete_flag = 0
+    </select>
+
+    <select id="isExistsById" parameterType="int" resultType="boolean">
+        SELECT EXISTS(SELECT 1
+                      FROM product
+                      WHERE id = #{id}
+                        AND delete_flag = 0)
+    </select>
+
+    <select id="isExistsByName" resultType="boolean">
+        SELECT EXISTS(SELECT 1
+                      FROM product
+                      WHERE NAME = #{name}
+                        AND delete_flag = 0)
+    </select>
+
+</mapper>

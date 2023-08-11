@@ -1,0 +1,31 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.training.repository.ProductRepository">
+    <resultMap id="statisProductResultMap" type="com.example.training.dto.StatisProductDto">
+        <result property="name" column="name"/>
+        <result property="totalMoney" column="total_money"/>
+        <result property="totalProduct" column="total_product" />
+    </resultMap>
+    <select id="findStatisProduct" resultMap="statisProductResultMap">
+        WITH months AS (SELECT month(m1) AS month, year(m1) AS year
+                        FROM (SELECT (DATE_SUB(now(), INTERVAL #{month} MONTH) -
+                                      INTERVAL DAYOFMONTH(DATE_SUB(now(), INTERVAL #{month} MONTH)) - 1 DAY)
+                                         + INTERVAL m MONTH AS m1
+                              FROM (SELECT @rownum := @rownum + 1 AS m
+                                    FROM (SELECT 1 union SELECT 2 union SELECT 3 union SELECT 4) t1,
+                                         (SELECT 1 union SELECT 2 union SELECT 3 union SELECT 4) t2,
+                                         (SELECT 1 union SELECT 2 union SELECT 3 union SELECT 4) t3,
+                                         (SELECT 1 union SELECT 2 union SELECT 3 union SELECT 4) t4,
+                                         (SELECT @rownum := -1) t0) d1) d2
+                        WHERE m1 &lt;= now()
+                        ORDER BY m1)
+        SELECT CONCAT('Tháng ', months.month, '/', months.year) AS 'name',
+               SUM(quantity * price)                            AS total_money,
+               SUM(quantity) * 5000                             AS total_product
+        FROM months
+                 LEFT JOIN orders_detail ON months.month = MONTH(orders_detail.order_date) AND
+                                            months.year = YEAR(orders_detail.order_date)
+        GROUP BY CONCAT('Tháng ', months.month, '/', months.year)
+    </select>
+</mapper>

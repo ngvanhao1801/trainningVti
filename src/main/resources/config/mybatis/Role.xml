@@ -1,0 +1,68 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.training.repository.RoleRepository">
+    <resultMap type="com.example.training.model.Role" id="resulMap">
+        <id property="id" column="id"/>
+        <result property="code" column="code"/>
+        <result property="name" column="name"/>
+    </resultMap>
+
+    <select id="getAllRoles" resultMap="resulMap">
+        SELECT *
+        FROM role
+        WHERE delete_flag = 0
+    </select>
+
+    <insert id="insert">
+        INSERT INTO role(code, name)
+        VALUES (#{code}, #{name})
+    </insert>
+
+    <update id="update">
+        UPDATE role
+        SET code = #{code},
+            name= #{name}
+        WHERE id = #{id}
+          AND delete_flag = 0
+    </update>
+
+    <update id="deleteById">
+        UPDATE role
+        SET delete_flag = 1
+        WHERE id = #{id}
+    </update>
+
+    <select id="findById" parameterType="int" resultMap="resulMap">
+        SELECT *
+        FROM role
+        WHERE id = #{id}
+          AND delete_flag = 0
+    </select>
+
+    <select id="checkExistByNameOrCode" resultType="int">
+        SELECT COUNT(*)
+        FROM role
+        WHERE (name = #{name}
+            OR code = #{code})
+          AND delete_flag = 0
+    </select>
+
+    <select id="checkExistById" parameterType="int" resultType="int">
+        SELECT COUNT(*)
+        FROM role
+        WHERE id = #{id}
+          AND delete_flag = 0
+    </select>
+
+    <select id="findRolesByUser" resultMap="resulMap">
+        SELECT r.id,
+               r.code,
+               r.name
+        FROM role r
+                 INNER JOIN user_role u
+                            ON r.id = u.role_id
+        WHERE user_id = #{userId}
+          AND r.delete_flag = 0
+    </select>
+</mapper>

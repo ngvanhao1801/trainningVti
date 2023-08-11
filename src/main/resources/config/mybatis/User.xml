@@ -1,0 +1,62 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.training.repository.UserRepository">
+    <resultMap id="userResultMap" type="com.example.training.model.User">
+        <result property="id" column="ID"/>
+        <result property="name" column="NAME"/>
+        <result property="email" column="EMAIL"/>
+        <result property="username" column="USERNAME"/>
+        <result property="password" column="PASSWORD"/>
+    </resultMap>
+
+    <insert id="insertUser">
+        INSERT INTO user (NAME, EMAIL, USERNAME, PASSWORD)
+        VALUES (#{name}, #{email}, #{username}, #{password})
+    </insert>
+
+    <update id="updateUser">
+        UPDATE user
+        SET NAME     = #{name},
+            EMAIL    = #{email},
+            USERNAME = #{username},
+            PASSWORD = #{password}
+        WHERE ID = #{id}
+          AND delete_flag = 0
+    </update>
+
+    <delete id="deleteUserById">
+        DELETE
+        from user
+        WHERE ID = #{id}
+    </delete>
+
+    <select id="selectAllUser" resultMap="userResultMap">
+        SELECT *
+        FROM user
+        WHERE delete_flag = 0
+    </select>
+
+    <select id="selectUserById" parameterType="int" resultMap="userResultMap">
+        SELECT *
+        FROM user
+        WHERE ID = #{id}
+          AND delete_flag = 0
+    </select>
+
+    <select id="isExistsById" parameterType="int" resultType="boolean">
+        SELECT EXISTS(SELECT 1 FROM user WHERE id = #{id} AND delete_flag = 0)
+    </select>
+
+    <select id="isExistsByUsername" resultType="boolean">
+        SELECT EXISTS(SELECT 1 FROM user WHERE USERNAME = #{username} AND delete_flag = 0)
+    </select>
+
+    <select id="findByUsername" resultMap="userResultMap">
+        SELECT *
+        FROM user
+        WHERE username = #{username}
+          AND delete_flag = 0
+    </select>
+
+</mapper>

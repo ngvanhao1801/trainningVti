@@ -1,0 +1,49 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.training.repository.ProductRepository">
+    <resultMap id="productDetailResultMap" type="com.example.training.dto.ProductDetailDto">
+        <result property="productId" column="PRODUCT_ID"/>
+        <result property="productName" column="PRODUCT_NAME"/>
+        <result property="shortDes" column="SHORT_DES"/>
+        <result property="description" column="DESCRIPTION"/>
+        <result property="price" column="PRICE"/>
+        <result property="total" column="TOTAL"/>
+        <collection property="categories" resultMap="categoryResultMap"/>
+    </resultMap>
+
+    <resultMap id="categoryResultMap" type="com.example.training.dto.CategoryDto">
+        <result property="categoryId" column="CATEGORY_ID"/>
+        <result property="categoryName" column="CATEGORY_NAME"/>
+    </resultMap>
+
+    <insert id="insertCategories" parameterType="com.example.training.dto.ProductDetailDto">
+        INSERT INTO category (category_id, category_name)
+        VALUES
+        <foreach collection="categories" item="category" separator=",">
+            (#{category.categoryId}, #{category.categoryName})
+        </foreach>
+    </insert>
+
+    <select id="findProductDetail" resultMap="productDetailResultMap">
+        SELECT c.id   AS category_id,
+               c.name AS category_name,
+               p.id   AS product_id,
+               p.name AS product_name,
+               p.short_des,
+               p.description,
+               p.price,
+               total
+        FROM product_category pc
+                 INNER JOIN product p ON
+            pc.product_id = p.id
+                 INNER JOIN category c ON
+            c.id = pc.category_id,
+             (SELECT SUM(quantity) AS total
+              FROM orders_detail od
+              WHERE od.product_id = #{id}) AS total_quantity
+        WHERE pc.product_id = #{id}
+          AND p.delete_flag = 0
+          AND c.delete_flag = 0
+    </select>
+</mapper>

@@ -1,0 +1,26 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.training.repository.ProductRepository">
+    <resultMap id="filterProductResultMap" type="com.example.training.model.Product">
+        <result property="name" column="name"/>
+        <result property="shortDes" column="short_des"/>
+        <result property="description" column="description"/>
+        <result property="price" column="price"/>
+    </resultMap>
+
+    <select id="findSearchProduct" resultMap="filterProductResultMap">
+        SELECT p.id,
+               p.name,
+               p.short_des,
+               p.description,
+               p.price
+        FROM product p
+        WHERE p.name LIKE CONCAT('%', #{keyword}, '%')
+           OR p.short_des LIKE CONCAT('%', #{keyword}, '%')
+           OR p.description LIKE CONCAT('%', #{keyword}, '%')
+        ORDER BY ${sortBy} ${sortType}
+        LIMIT #{limit}
+        OFFSET #{offset}
+    </select>
+</mapper>
